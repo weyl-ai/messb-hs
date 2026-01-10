@@ -1,0 +1,109 @@
+cabal-version: 3.0
+name: mess-b
+version: 0.1.0.0
+synopsis: Minimal Explanatory Stack Subtrace with Boundaries
+description:
+  MESS-B filters Nix evaluator stack traces to their causal essence
+  while preserving semantic boundaries between user code and library
+  internals. Reduces typical 19KB error traces to 6 frames with
+  diagnostic hints.
+
+license: MIT
+license-file: LICENSE
+author: Weyl AI
+maintainer: dev@weyl.ai
+copyright: 2026 Weyl AI
+category: Development
+build-type: Simple
+extra-source-files:
+  README.md
+  CHANGELOG.md
+
+tested-with: GHC == 9.6.4, GHC == 9.8.2
+
+source-repository head
+  type: git
+  location: https://github.com/weyl-ai/mess-b
+
+common warnings
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-deriving-strategies
+    -Wpartial-fields
+    -Wredundant-constraints
+    -Werror
+
+common extensions
+  default-language: GHC2021
+  default-extensions:
+    StrictData
+    OverloadedStrings
+    DerivingStrategies
+
+library
+  import: warnings, extensions
+  exposed-modules:
+    MessB
+    MessB.Types
+    MessB.Classification
+    MessB.Parser
+    MessB.Boundary
+    MessB.Hints
+    MessB.Filter
+    MessB.Render
+  build-depends:
+    base >= 4.17 && < 5,
+    containers >= 0.6 && < 0.8,
+    text >= 2.0 && < 2.2,
+    diagnose >= 2.5 && < 3.0,
+    prettyprinter >= 1.7 && < 1.8
+  hs-source-dirs: src
+
+executable mess-b
+  import: warnings, extensions
+  main-is: Main.hs
+  build-depends:
+    base >= 4.17 && < 5,
+    mess-b,
+    text >= 2.0 && < 2.2,
+    optparse-applicative >= 0.18 && < 0.19
+  hs-source-dirs: app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+
+test-suite mess-b-test
+  import: warnings, extensions
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+    MessB.ClassificationSpec
+    MessB.ParserSpec
+    MessB.FilterSpec
+    MessB.Properties
+    -- MessB.CorpusSpec
+  build-depends:
+    base >= 4.17 && < 5,
+    mess-b,
+    text >= 2.0 && < 2.2,
+    containers >= 0.6 && < 0.8,
+    hspec >= 2.11 && < 2.12,
+    QuickCheck >= 2.14 && < 2.16,
+    hedgehog >= 1.4 && < 1.6,
+    filepath >= 1.4 && < 1.6
+  hs-source-dirs: test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+
+benchmark mess-b-bench
+  import: warnings, extensions
+  type: exitcode-stdio-1.0
+  main-is: Bench.hs
+  build-depends:
+    base >= 4.17 && < 5,
+    mess-b,
+    text >= 2.0 && < 2.2,
+    criterion >= 1.6 && < 1.7
+  hs-source-dirs: bench
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
